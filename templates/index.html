@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loja de Salgados</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            background-color: #f9f5eb;
+            font-family: 'Arial', sans-serif;
+        }
+
+        /* Banner principal */
+        #banner {
+            background: linear-gradient(90deg, #ffcc80, #ffab40);
+            color: white;
+            text-align: center;
+            padding: 20px;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        /* Ícones de redes sociais */
+        .social-icons {
+            margin-top: 10px;
+        }
+
+        .social-icons a {
+            color: white;
+            margin: 0 10px;
+            font-size: 20px;
+            transition: transform 0.3s ease, color 0.3s ease;
+        }
+
+        .social-icons a:hover {
+            transform: scale(1.2);
+            color: #ff6f00;
+        }
+
+        /* Botão de contato */
+        .contact-btn {
+            background-color: #ff5722;
+            color: white;
+            font-weight: bold;
+            border: none;
+            border-radius: 5px;
+            padding: 10px 20px;
+            text-decoration: none;
+        }
+
+        .contact-btn:hover {
+            background-color: #e64a19;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <!-- Background e cabeçalho -->
+    <header class="bg-primary text-white text-center py-3 position-relative">
+        <h1>Loja de Salgados</h1>
+        <div class="position-absolute top-0 end-0 me-3">
+            <span class="badge bg-danger" id="carrinho-badge">0</span>
+            <i class="fas fa-shopping-cart fa-2x text-white" id="carrinho-icon" style="cursor: pointer;"></i>
+        </div>
+    </header>
+
+    <!-- Banner promocional -->
+    <div id="banner">
+        Salgados deliciosos feitos pela Rose
+        <div class="social-icons">
+            <a href="https://facebook.com" target="_blank"><i class="fab fa-facebook"></i></a>
+            <a href="https://instagram.com" target="_blank"><i class="fab fa-instagram"></i></a>
+            <a href="https://twitter.com" target="_blank"><i class="fab fa-twitter"></i></a>
+        </div>
+        <div class="mt-3">
+            <a href="https://wa.me/5599999999999" target="_blank" class="contact-btn">Contato via WhatsApp</a>
+        </div>
+    </div>
+
+    <!-- Container de produtos -->
+    <div class="container mt-4">
+        <div class="row" id="produtos"></div>
+    </div>
+<!-- Modal do carrinho -->
+<div class="modal fade" id="carrinhoModal" tabindex="-1" aria-labelledby="carrinhoModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="carrinhoModalLabel">Carrinho de Compras</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <ul id="carrinho-lista" class="list-group"></ul>
+                <div class="mt-3">
+                    <h5>Total: R$ <span id="carrinho-total">0.00</span></h5>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                <button type="button" class="btn btn-success" onclick="finalizarCompra()">Finalizar Compra</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Array de produtos
+    const produtos = [
+    { id: 1, nome: 'Coxinha', preco: 5.0, descricao: 'Coxinha crocante recheada com frango', imagem: 'static/images/coxinha.jpg' },
+    { id: 2, nome: 'Empada', preco: 4.5, descricao: 'Empada de frango com catupiry', imagem: 'static/images/photo-1518311297794-ec7298ffba64.avif' },
+    { id: 3, nome: 'Enroladinho', preco: 6.0, descricao: 'Enroladinho de presunto e queijo', imagem: 'static/images/photo-1518311297794-ec7298ffba64.avif' },
+    { id: 4, nome: 'Pastel', preco: 4.0, descricao: 'Pastel de carne com massa crocante', imagem: 'static/images/photo-1608039783021-6116a558f0c5.avif' },
+    { id: 5, nome: 'Quibe', preco: 5.5, descricao: 'Quibe de carne com temperos especiais', imagem: 'static/images/quibe.jpg' },
+    { id: 6, nome: 'Esfirra', preco: 3.5, descricao: 'Esfirra de carne bem temperada', imagem: 'static/images/esfiha.jpg' }
+];
+
+
+        // Inicializa carrinho
+        const carrinho = {};
+
+        function renderizarProdutos() {
+            const container = document.getElementById('produtos');
+            container.innerHTML = '';
+            produtos.forEach(produto => {
+                const produtoHtml = `
+                    <div class="col-4">
+                        <div class="card">
+                            <img src="${produto.imagem}" class="card-img-top" alt="${produto.nome}">
+                            <div class="card-body">
+                                <h5 class="card-title">${produto.nome}</h5>
+                                <p class="card-text">${produto.descricao}</p>
+                                <p class="card-text">R$ ${produto.preco.toFixed(2)}</p>
+                                <button class="btn btn-primary" onclick="adicionarCarrinho(${produto.id})">Adicionar ao Carrinho</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                container.innerHTML += produtoHtml;
+            });
+        }
+        // Adiciona evento ao ícone do carrinho para abrir o modal
+document.getElementById('carrinho-icon').addEventListener('click', function () {
+    const modal = new bootstrap.Modal(document.getElementById('carrinhoModal'));
+    modal.show();
+});
+
+
+        function adicionarCarrinho(produtoId) {
+            const produto = produtos.find(p => p.id === produtoId);
+            if (!carrinho[produtoId]) {
+                carrinho[produtoId] = { ...produto, quantidade: 1 };
+            } else {
+                carrinho[produtoId].quantidade += 1;
+            }
+            atualizarCarrinho();
+        }
+
+        function atualizarCarrinho() {
+            const carrinhoLista = document.getElementById('carrinho-lista');
+            const carrinhoBadge = document.getElementById('carrinho-badge');
+            const carrinhoTotal = document.getElementById('carrinho-total');
+            let total = 0;
+            let quantidadeTotal = 0;
+            carrinhoLista.innerHTML = '';
+            Object.values(carrinho).forEach(item => {
+                total += item.preco * item.quantidade;
+                quantidadeTotal += item.quantidade;
+                carrinhoLista.innerHTML += `
+                    <li class="list-group-item">
+                        ${item.nome} - R$ ${item.preco.toFixed(2)} x ${item.quantidade}
+                        <button class="btn btn-sm btn-danger float-end" onclick="removerDoCarrinho(${item.id})">Remover</button>
+                    </li>
+                `;
+            });
+            carrinhoBadge.textContent = quantidadeTotal;
+            carrinhoTotal.textContent = total.toFixed(2);
+        }
+
+        function removerDoCarrinho(produtoId) {
+            delete carrinho[produtoId];
+            atualizarCarrinho();
+        }
+
+        function finalizarCompra() {
+            alert('Compra finalizada!');
+            Object.keys(carrinho).forEach(key => delete carrinho[key]);
+            atualizarCarrinho();
+        }
+
+        // Renderizar produtos na página
+        renderizarProdutos();
+    </script>
+</body>
+</html>
